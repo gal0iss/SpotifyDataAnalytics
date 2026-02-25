@@ -79,7 +79,7 @@ Archivos Parquet en `data/processed/`:
 | `dim_location_enriched.parquet` | Ubicación enriquecida (ciudad, ISP, lat/lon) |
 | `fact_table.parquet` | Tabla de hechos (reproduciones) |
 
-## � Archivos de registro
+##  Archivos de registro
 
 Los mensajes del pipeline se envían tanto a la consola como a un fichero de
 texto dentro de la carpeta `logs/` (se crea automáticamente). Revisa los logs
@@ -123,12 +123,12 @@ Ver `requirements.txt` para versiones exactas.
 ## 🎓 Propósito
 
 Portfolio técnico demostrando:
-- ✅ Ingeniería de datos (ETL)
-- ✅ Modelado dimensional (Star Schema)
-- ✅ Limpieza y validación de datos
-- ✅ GIS/Geolocalización
-- ✅ Pandas y procesamiento de datos
-- ✅ Estructuración de proyectos Python
+-  Ingeniería de datos (ETL)
+-  Modelado dimensional (Star Schema)
+-  Limpieza y validación de datos
+-  GIS/Geolocalización
+-  Pandas y procesamiento de datos
+-  Estructuración de proyectos Python
 
 ---
 
