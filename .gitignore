@@ -1,0 +1,76 @@
+# Virtual Environments
+venv/
+.venv/
+env/
+.env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Logs
+logs/
+*.log
+
+# Data (local, no versionable)
+data/raw/
+data/rawPedro/
+data/processed/
+data/processedPedro/
+
+*.parquet
+*.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Databases (archivos locales)
+data/Databases/
+data/Databases/**
+
+# Caches from testing and type checking
+.pytest_cache/
+.mypy_cache/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Build and packaging
+build/
+dist/
+*.egg-info/
+*.egg
+*.whl
+
+data/*.db
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# Additional temp files
+*.env
+*.env.*
+*.log
+
+# Pyenv
+.python-version
+
