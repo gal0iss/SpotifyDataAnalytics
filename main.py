@@ -20,9 +20,8 @@ from config import RAW_DATA_DIR, PROCESSED_DATA_DIR, LOGS_DIR
 # ============================================
 # PRE-VALIDACIÓN: Verificar rutas y permisos
 # ============================================
-logger.info("="*60)
-logger.info("📋 VALIDANDO CONFIGURACIÓN Y RUTAS")
-logger.info("="*60)
+logger.info(" VALIDANDO CONFIGURACIÓN Y RUTAS")
+
 
 try:
     if not validate_input_directory(RAW_DATA_DIR, "*.json"):
@@ -46,7 +45,7 @@ except Exception as e:
 # PASO 1: EXTRACT & TRANSFORM
 # ============================================
 
-logger.info("🔧 PASO 1: EXTRACT & TRANSFORM")
+logger.info(" PASO 1: EXTRACT & TRANSFORM")
 
 try:
     etl_main()
@@ -83,10 +82,8 @@ except Exception as e:
 # ============================================
 # RESUMEN FINAL
 # ============================================
-logger.info("\n" + "="*60)
-logger.info("🎉 PIPELINE COMPLETADO")
-logger.info("="*60)
-logger.info("\n📁 Datos procesados guardados en:")
+logger.info(" PIPELINE COMPLETADO")
+logger.info("\n Datos procesados guardados en:")
 logger.info(f"   → {PROCESSED_DATA_DIR}")
 logger.info("\n Archivos generados:")
 logger.info("   - dim_date.parquet")
@@ -98,4 +95,4 @@ logger.info("   - dim_location_enriched.parquet (si aplicó geolocalización)")
 logger.info("   - fact_table.parquet")
 logger.info("\n Log de ejecución guardado en:")
 logger.info(f"   → {LOGS_DIR}")
-logger.info("\n✨ Listo para análisis")
+logger.info("\n Listo para análisis")
