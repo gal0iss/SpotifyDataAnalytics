@@ -55,6 +55,7 @@ def save_to_parquet(df: pd.DataFrame, output_file: Path) -> None:
         Exception: Si hay error en la escritura
     """
     try:
+        output_file.parent.mkdir(parents=True, exist_ok=True)
         df.to_parquet(output_file, index=False)
         logger.info(f"✓ Tabla [{output_file.stem}] guardada: {output_file.name} ({len(df)} filas)")
     except Exception as e:
@@ -290,6 +291,12 @@ def main() -> None:
     dim_track = create_dim_track(df)
     dim_episode = create_dim_episode(df)
     dim_location = create_dim_location(df)
+
+    # Claves URI: JSON null → float64 en pandas; alinear con dimensiones (string nullable).
+    df["spotify_track_uri"] = df["spotify_track_uri"].astype(pd.StringDtype())
+    df["spotify_episode_uri"] = df["spotify_episode_uri"].astype(pd.StringDtype())
+    dim_track["spotify_track_uri"] = dim_track["spotify_track_uri"].astype(pd.StringDtype())
+    dim_episode["spotify_episode_uri"] = dim_episode["spotify_episode_uri"].astype(pd.StringDtype())
 
     # 3. MERGES (Solo contra las Natural Keys únicas para evitar duplicar filas)
     # Importante: No incluimos columnas de atributos en el merge, solo la natural key y el id.

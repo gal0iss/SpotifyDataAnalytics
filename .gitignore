@@ -74,3 +74,5 @@ coverage.xml
 # Pyenv
 .python-version
 
+#md
+TECHNICAL_DOCUMENTATION.md
