@@ -14,7 +14,7 @@ from datetime import datetime
 
 def setup_logger(name: str = "spotify_pipeline") -> logging.Logger:
     """
-    Configura un logger profesional con formato estándar.
+    Configura un logger con formato estándar.
     
     Args:
         name: Nombre del logger
@@ -29,7 +29,7 @@ def setup_logger(name: str = "spotify_pipeline") -> logging.Logger:
     if logger.handlers:
         return logger
     
-    # Formato profesional: timestamp, nivel, módulo, mensaje
+    # Formato: timestamp, nivel, módulo, mensaje
     formatter = logging.Formatter(
         fmt='%(asctime)s | %(levelname)-8s | %(name)s | %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'

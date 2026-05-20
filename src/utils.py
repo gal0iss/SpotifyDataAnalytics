@@ -25,7 +25,7 @@ def validate_input_file(file_path: Path, file_type: str = "file") -> bool:
         logger.error(f"{file_type} no es un archivo válido: {file_path}")
         return False
     
-    logger.debug(f"✓ {file_type} validado: {file_path}")
+    logger.debug(f" {file_type} validado: {file_path}")
     return True
 
 
@@ -53,9 +53,9 @@ def validate_input_directory(dir_path: Path, must_contain: str = None) -> bool:
         if not files:
             logger.error(f"Directorio vacío o sin archivos '{must_contain}': {dir_path}")
             return False
-        logger.debug(f"✓ Directorio contiene {len(files)} archivos: {must_contain}")
+        logger.debug(f" Directorio contiene {len(files)} archivos: {must_contain}")
     
-    logger.debug(f"✓ Directorio validado: {dir_path}")
+    logger.debug(f" Directorio validado: {dir_path}")
     return True
 
 

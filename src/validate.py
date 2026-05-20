@@ -73,8 +73,12 @@ def validate_data() -> None:
     except Exception as e:
         logger.warning(f"   Error mostrando muestra: {e}")
 
-if __name__ == "__main__":
+def _main_cli() -> None:
     try:
         validate_data()
     except Exception as e:
         logger.error(f"Error en validación: {e}", exc_info=True)
+
+
+if __name__ == "__main__":
+    _main_cli()
