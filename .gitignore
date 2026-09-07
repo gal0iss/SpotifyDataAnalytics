@@ -26,6 +26,15 @@ data/processedPedro/
 *.parquet
 *.json
 
+# Frontend beta: contrato público de datos y configuración de build
+!frontend/package.json
+!frontend/package-lock.json
+!frontend/tsconfig.json
+!frontend/tsconfig.app.json
+!frontend/public/
+!frontend/public/parquet/
+!frontend/public/parquet/*.parquet
+
 # IDE
 .vscode/
 .idea/
@@ -46,6 +55,10 @@ data/Databases/**
 
 # Jupyter checkpoints
 .ipynb_checkpoints/
+edanotebook.ipynb
+
+# Exploratory analysis scripts
+src/analisis/
 
 # Build and packaging
 build/
@@ -76,3 +89,4 @@ coverage.xml
 
 #md
 TECHNICAL_DOCUMENTATION.md
+DOC.MD

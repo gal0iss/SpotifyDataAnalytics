@@ -14,13 +14,10 @@ from config import DIM_LOCATION_FILE, FACT_TABLE_FILE, UNKNOWN_VALUE, UNKNOWN_ID
 
 def extract_json_files(path: Path) -> pd.DataFrame:
     """Extrae y concatena todos los JSONs de Spotify desde un directorio.
-    
     Args:
         path: Ruta del directorio contiendo archivos JSON
-        
     Returns:
         DataFrame con todos los registros concatenados
-        
     Raises:
         FileNotFoundError: Si la ruta no existe o está vacía
     """
@@ -46,11 +43,9 @@ def extract_json_files(path: Path) -> pd.DataFrame:
 
 def save_to_parquet(df: pd.DataFrame, output_file: Path) -> None:
     """Guarda un DataFrame en formato Parquet.
-    
     Args:
         df: DataFrame a guardar
         output_file: Ruta de salida del archivo
-        
     Raises:
         Exception: Si hay error en la escritura
     """
@@ -68,10 +63,8 @@ def save_to_parquet(df: pd.DataFrame, output_file: Path) -> None:
 
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     """Limpia datos: elimina columnas vacías y agrega event_id.
-    
     Args:
         df: DataFrame a limpiar
-        
     Returns:
         DataFrame limpio con column event_id
     """
@@ -91,10 +84,8 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
 
 def create_dim_date(df: pd.DataFrame) -> pd.DataFrame:
     """Crea dimensión temporal con granularidad horaria.
-    
     Args:
         df: DataFrame con columna 'ts' en formato datetime
-        
     Returns:
         DataFrame dim_date con PK=date_id (YYYYMMDDHH)
     """
@@ -116,10 +107,8 @@ def create_dim_date(df: pd.DataFrame) -> pd.DataFrame:
 
 def classify_device(platform: str | None) -> str:
     """Clasifica dispositivo según plataforma.
-    
     Args:
         platform: Nombre de la plataforma
-        
     Returns:
         Tipo de dispositivo: 'mobile', 'desktop', 'web', otros o 'unknown'
     """
@@ -132,10 +121,8 @@ def classify_device(platform: str | None) -> str:
 
 def create_dim_device(df: pd.DataFrame) -> pd.DataFrame:
     """Crea dimensión de dispositivos con clasificación tipo.
-    
     Args:
-        df: DataFrame con columna 'platform'
-        
+        df: DataFrame con columna 'platform' 
     Returns:
         DataFrame dim_device con PK=device_id
     """
@@ -154,10 +141,8 @@ def create_dim_device(df: pd.DataFrame) -> pd.DataFrame:
 
 def create_dim_track(df: pd.DataFrame) -> pd.DataFrame:
     """Crea dimensión de tracks (canciones).
-    
     Args:
         df: DataFrame con columnas de track Spotify
-        
     Returns:
         DataFrame dim_track con PK=track_id
     """
@@ -189,10 +174,8 @@ def create_dim_track(df: pd.DataFrame) -> pd.DataFrame:
 
 def create_dim_episode(df: pd.DataFrame) -> pd.DataFrame:
     """Crea dimensión de episodios (podcasts).
-    
     Args:
         df: DataFrame con columnas de episode Spotify
-        
     Returns:
         DataFrame dim_episode con PK=episode_id
     """
@@ -221,10 +204,8 @@ def create_dim_episode(df: pd.DataFrame) -> pd.DataFrame:
 
 def create_dim_location(df: pd.DataFrame) -> pd.DataFrame:
     """Crea dimensión de ubicación (IPs y países).
-    
     Args:
         df: DataFrame con columnas 'ip_addr' y 'conn_country'
-        
     Returns:
         DataFrame dim_location con PK=location_id
     """
@@ -244,7 +225,6 @@ def create_dim_location(df: pd.DataFrame) -> pd.DataFrame:
 
 def create_fact_table(df: pd.DataFrame) -> pd.DataFrame:
     """Crea tabla de hechos con eventos de reproducción (Star Schema).
-    
     Args:
         df: DataFrame inicial con todas las columnas y FKs mergeadas
         
