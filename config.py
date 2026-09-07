@@ -20,7 +20,8 @@ RAW_DATA_DIR = DATA_DIR / f"raw{USER_SUFFIX}"
 PROCESSED_DATA_DIR = DATA_DIR / f"processed{USER_SUFFIX}"
 
 LOGS_DIR = PROJECT_ROOT / "logs"
-DB_DIR = DATA_DIR / f"Databases{USER_SUFFIX}"
+# Las bases GeoLite2 son comunes a todos los conjuntos de datos y usuarios.
+DB_DIR = DATA_DIR / "Databases"
 
 # Crear directorios si no existen
 RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)

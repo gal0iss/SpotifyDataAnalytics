@@ -1,61 +1,70 @@
-# Spotify Portfolio - Análisis de datos
+# Portafolio Spotify
 
-Pipeline ETL que procesa historiales JSON de Spotify y genera dimensiones
-(fecha, dispositivo, track, episodio, ubicación) y una tabla de hechos con
-eventos de reproducción. Incluye enriquecimiento de IPs usando bases
-GeoLite2. Pensado para hacer un análisis de datos mediante Power BI.
+Pipeline ETL en Python para transformar historiales de reproducción de Spotify
+(JSON) en un modelo dimensional en formato Parquet, listo para análisis en
+Power BI u otras herramientas de BI.
 
-## Estructura principal
+## Qué hace
 
-```
-portafolio-spotify/
-├── src/
-│   ├── ReadProcess.py
-│   ├── localization.py
-│   └── validate.py
-├── data/
-│   ├── raw/
-│   ├── processed/
-│   └── Databases/
-├── tests/
-│   ├──init
-│   ├── confest
-│   ├── README.md
-│   ├── test_localization
-│   ├── test_logger
-│   ├── test_main
-│   ├── test_pipeline
-│   ├── test_read_process
-│   └── test_utils
-├── main.py
-├── requirements.txt
-└── README.md
+- Extrae y concatena historiales desde `data/raw/`.
+- Limpia registros y genera dimensiones de fecha, dispositivo, track, episodio y ubicación.
+- Construye `fact_table.parquet` con claves foráneas y métricas de reproducción.
+- Enriquece IP públicas con GeoLite2 City y ASN cuando las bases están disponibles.
+- Registra el proceso en `logs/`.
+
+## Requisitos y ejecución
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python main.py
 ```
 
-## Uso 
+Coloca los JSON de Spotify en `data/raw/`. Para el enriquecimiento geográfico,
+coloca `GeoLite2-City.mmdb` y `GeoLite2-ASN.mmdb` en `data/Databases/`. La
+geolocalización es opcional; el ETL principal puede completarse sin esas bases.
 
-1. Crear y activar entorno virtual.
-2. `pip install -r requirements.txt`.
-3. Colocar los JSON de historial en `data/raw/`.
-4. Opcional: añadir bases GeoLite2 en `data/Databases/`.
-5. Ejecutar `python main.py`.
+Para procesar otro conjunto, define `SPOTIFY_USER_SUFFIX`. Por ejemplo,
+`SPOTIFY_USER_SUFFIX=Pedro` utiliza `data/rawPedro/` y `data/processedPedro/`.
+Las bases GeoLite2 se leen siempre desde `data/Databases/`, independientemente
+del sufijo.
 
-El pipeline realiza extracción, transformación, enriquecimiento y
-validación. Los resultados se escriben en `data/processed/` como archivos
-Parquet.
+## Salidas
+
+El proceso escribe en `data/processed/` (o en la ruta correspondiente al sufijo):
+
+```text
+dim_date.parquet
+dim_device.parquet
+dim_track.parquet
+dim_episode.parquet
+dim_location.parquet
+fact_table.parquet
+dim_location_enriched.parquet  # si la geolocalización se completa
+```
 
 ## Tests
 
-Ver `tests/README.md` para instrucciones completas. Se incluyen pruebas
-unitarias e integración; se pueden ejecutar con `pytest` o
-`python run_tests.py`.
+```powershell
+pytest
+pytest --cov=src --cov-report=html
+```
 
-## Notas
+La suite incluye pruebas unitarias y de integración.
 
-- La carpeta `data/` no se versiona.
-- El proceso es idempotente y tolerante a errores.
-- Los mensajes se muestran en la consola.
+## Estructura
 
----
+```text
+src/                    # ETL, geolocalización, validación y utilidades
+tests/                  # Suite de pytest
+data/raw/               # Entrada local, no versionada
+data/processed/         # Salidas Parquet, no versionadas
+data/Databases/         # Bases GeoLite2, no versionadas
+main.py                 # Orquestador
+config.py               # Rutas y constantes
+TECHNICAL_DOCUMENTATION.md
+```
 
-Última actualización: Marzo 2026
+Los datos, bases GeoLite2, logs, reportes de cobertura  y
+los scripts de análisis local no se versionan.
