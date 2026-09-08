@@ -28,7 +28,7 @@ export async function initializeDatabase(): Promise<void> {
     for (const file of parquetFiles) {
       await database.registerFileURL(
         `${file}.parquet`,
-        `${window.location.origin}/parquet/${file}.parquet`,
+        `${import.meta.env.BASE_URL}parquet/${file}.parquet`,
         duckdb.DuckDBDataProtocol.HTTP,
         false,
       );
