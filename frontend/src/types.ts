@@ -88,3 +88,5 @@ export interface QualitySummary {
   trackCoverage: number;
   locationCoverage: number;
 }
+
+export type Page = 'overview' | 'analytics' | 'model' | 'pipeline';
