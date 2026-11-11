@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { queryArtistsAll } from '../../data/queries';
 import { useCopy } from '../../hooks/useCopy';
 import { useQuery } from '../../hooks/useQuery';
+import { ArtistDetail } from './ArtistDetail';
 import { StatePanel } from '../StatePanel';
 
 interface ArtistRow {
@@ -20,6 +21,7 @@ export function ArtistExplorer({ rows, year, device }: ArtistExplorerProps) {
   const t = useCopy();
   const [expanded, setExpanded] = useState(false);
   const [search, setSearch] = useState('');
+  const [selectedArtist, setSelectedArtist] = useState<string | null>(null);
   const allArtists = useQuery(
     () => (expanded ? queryArtistsAll(year, device) : Promise.resolve([])),
     [expanded, year, device],
@@ -57,7 +59,7 @@ export function ArtistExplorer({ rows, year, device }: ArtistExplorerProps) {
           {expanded ? t('hideTable') : t('showTable')}
         </button>
         <span className="data-badge">
-          {expanded ? `${allArtists.data?.length ?? 0} artists` : 'Top 10'}
+          {expanded ? `${allArtists.data?.length ?? 0} ${t('artists')}` : 'Top 10'}
         </span>
       </div>
 
@@ -69,14 +71,27 @@ export function ArtistExplorer({ rows, year, device }: ArtistExplorerProps) {
             <thead>
               <tr>
                 <th>{t('rank')}</th>
-                <th>Artist</th>
+                <th>{t('artist')}</th>
                 <th>{t('events')}</th>
                 <th>{t('hours')}</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((row, index) => (
-                <tr key={row.name}>
+                <tr
+                  key={row.name}
+                  className={selectedArtist === row.name ? 'selected' : undefined}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={selectedArtist === row.name}
+                  onClick={() => setSelectedArtist(row.name)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      setSelectedArtist(row.name);
+                    }
+                  }}
+                >
                   <td>{index + 1}</td>
                   <td>{row.name}</td>
                   <td>{Number(row.events).toLocaleString()}</td>
@@ -86,6 +101,17 @@ export function ArtistExplorer({ rows, year, device }: ArtistExplorerProps) {
             </tbody>
           </table>
         </div>
+      )}
+
+      {selectedArtist ? (
+        <ArtistDetail
+          artist={selectedArtist}
+          year={year}
+          device={device}
+          onClose={() => setSelectedArtist(null)}
+        />
+      ) : (
+        <p className="artist-detail-hint">{t('selectArtist')}</p>
       )}
     </section>
   );

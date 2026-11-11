@@ -8,7 +8,7 @@ import {
   queryGrowth,
   queryInsights,
 } from '../../data/queries';
-import { useLanguage } from '../../i18n';
+import { useLanguage, useTheme } from '../../i18n';
 
 const weekdays = [
   'Monday',
@@ -60,13 +60,17 @@ export function InsightStrip({ year, device }: FilterValues) {
     [
       t('averageEvent'),
       data ? `${Number(data.averageMinutes).toFixed(1)} ${t('minutes')}` : '—',
-      'SUM(ms_played) / COUNT(*)',
+      t('averageEventNote'),
     ],
-    [t('skipRate'), data ? `${Number(data.skipRate).toFixed(1)}%` : '—', 'skipped = true'],
+    [
+      t('skipRate'),
+      data ? `${Number(data.skipRate).toFixed(1)}%` : '—',
+      t('skipRateNote'),
+    ],
     [
       t('shuffleRate'),
       data ? `${Number(data.shuffleRate).toFixed(1)}%` : '—',
-      'shuffle = true',
+      t('shuffleRateNote'),
     ],
   ];
 
@@ -88,6 +92,9 @@ export function InsightStrip({ year, device }: FilterValues) {
 
 export function DiscoverySection({ year, device }: FilterValues) {
   const t = useCopy();
+  const { theme } = useTheme();
+  const chartForeground = theme === 'dark' ? '#aab8ca' : '#667085';
+  const chartGrid = theme === 'dark' ? '#344256' : '#e9edf2';
   const discovery = useQuery(() => queryDiscovery(year, device), [year, device]);
   const growth = useQuery(() => queryGrowth(year, device), [year, device]);
   const data = discovery.data;
@@ -105,29 +112,36 @@ export function DiscoverySection({ year, device }: FilterValues) {
     [
       t('uniqueAlbums'),
       data ? Number(data.uniqueAlbums).toLocaleString() : '—',
-      'album_name distinct',
+      t('uniqueAlbumsNote'),
     ],
     [
       t('diversity'),
       data ? `${(Number(data.diversity) * 100).toFixed(2)}%` : '—',
-      'unique artists / events',
+      t('diversityNote'),
     ],
   ];
 
   const option = {
-    tooltip: { trigger: 'axis' as const },
+    tooltip: {
+      trigger: 'axis' as const,
+      backgroundColor: theme === 'dark' ? '#192638' : '#fff',
+      borderColor: theme === 'dark' ? '#41516a' : '#e4e7ec',
+      textStyle: { color: theme === 'dark' ? '#edf4ff' : '#1d2939' },
+    },
     legend: {
       bottom: 0,
-      textStyle: { color: '#667085', fontFamily: 'DM Sans' },
+      textStyle: { color: chartForeground, fontFamily: 'DM Sans' },
     },
     grid: { left: 42, right: 18, top: 24, bottom: 45, containLabel: true },
     xAxis: {
       type: 'category' as const,
       data: growth.data?.map((row) => String(row.year)),
+      axisLabel: { color: chartForeground },
     },
     yAxis: {
       type: 'value' as const,
-      splitLine: { lineStyle: { color: '#e9edf2' } },
+      axisLabel: { color: chartForeground },
+      splitLine: { lineStyle: { color: chartGrid } },
     },
     series: [
       {
@@ -180,7 +194,9 @@ export function DiscoverySection({ year, device }: FilterValues) {
             </h3>
             <p>{t('growthText')}</p>
           </div>
-          <span className="data-badge">{growth.data?.length ?? 0} years</span>
+          <span className="data-badge">
+            {growth.data?.length ?? 0} {t('yearsCount')}
+          </span>
         </div>
         <StatePanel
           loading={growth.loading}
@@ -195,17 +211,21 @@ export function DiscoverySection({ year, device }: FilterValues) {
 
 export function ConsistencySection({ year, device }: FilterValues) {
   const t = useCopy();
+  const { language } = useLanguage();
   const result = useQuery(() => queryConsistency(year, device), [year, device]);
   const data = result.data;
 
   const formatDay = (value: string) =>
     value === '—'
       ? value
-      : new Date(`${value}T00:00:00`).toLocaleDateString(undefined, {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        });
+      : new Date(`${value}T00:00:00`).toLocaleDateString(
+          language === 'es' ? 'es-ES' : 'en-US',
+          {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          },
+        );
 
   const cards: [string, string, string][] = [
     [
@@ -221,17 +241,17 @@ export function ConsistencySection({ year, device }: FilterValues) {
     [
       t('activeDays'),
       data ? Number(data.activeDays).toLocaleString() : '—',
-      'unique calendar days',
+      t('activeDaysNote'),
     ],
     [
       t('inactiveDays'),
       data ? Number(data.inactiveDays).toLocaleString() : '—',
-      'within observed range',
+      t('inactiveDaysNote'),
     ],
     [
       t('maxStreak'),
-      data ? `${Number(data.maxStreak)} days` : '—',
-      'consecutive active days',
+      data ? `${Number(data.maxStreak)} ${t('daysCount')}` : '—',
+      t('maxStreakNote'),
     ],
   ];
 

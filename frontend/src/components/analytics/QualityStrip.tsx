@@ -16,22 +16,24 @@ export function QualityStrip({ year, device }: QualityStripProps) {
     [
       t('unknownTracks'),
       data ? Number(data.unknownTracks).toLocaleString() : '—',
-      data ? `${(100 - Number(data.trackCoverage)).toFixed(2)}% of events` : '',
+      data ? `${(100 - Number(data.trackCoverage)).toFixed(2)}% ${t('percentOfEvents')}` : '',
     ],
     [
       t('unknownLocations'),
       data ? Number(data.unknownLocations).toLocaleString() : '—',
-      data ? `${(100 - Number(data.locationCoverage)).toFixed(2)}% without country` : '',
+      data
+        ? `${(100 - Number(data.locationCoverage)).toFixed(2)}% ${t('percentWithoutCountry')}`
+        : '',
     ],
     [
       t('trackCoverage'),
       data ? `${Number(data.trackCoverage).toFixed(1)}%` : '—',
-      'track_id mapped',
+      t('trackMapped'),
     ],
     [
       t('locationCoverage'),
       data ? `${Number(data.locationCoverage).toFixed(1)}%` : '—',
-      'country enriched',
+      t('countryEnriched'),
     ],
   ];
 

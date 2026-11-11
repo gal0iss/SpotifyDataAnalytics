@@ -27,7 +27,7 @@ import {
 } from '../data/queries';
 import { useCopy } from '../hooks/useCopy';
 import { useQuery } from '../hooks/useQuery';
-import { useLanguage } from '../i18n';
+import { useLanguage, useTheme } from '../i18n';
 import type { Filters } from '../types';
 import { weekdayEs } from '../components/analytics/InsightSections';
 
@@ -36,6 +36,9 @@ const initialFilters: Filters = { year: 'all', device: 'all' };
 export function AnalyticsPage() {
   const t = useCopy();
   const { language } = useLanguage();
+  const { theme } = useTheme();
+  const chartForeground = theme === 'dark' ? '#aab8ca' : '#667085';
+  const chartGrid = theme === 'dark' ? '#344256' : '#e9edf2';
   const [filters, setFilters] = useState(initialFilters);
   const options = useQuery(queryOptions, []);
   const summary = useQuery(
@@ -73,9 +76,14 @@ export function AnalyticsPage() {
   );
 
   const chartText = {
-    textStyle: { fontFamily: 'DM Sans, sans-serif', color: '#667085' },
+    textStyle: { fontFamily: 'DM Sans, sans-serif', color: chartForeground },
     grid: { left: 42, right: 18, top: 20, bottom: 32, containLabel: true },
-    tooltip: { trigger: 'axis' as const },
+    tooltip: {
+      trigger: 'axis' as const,
+      backgroundColor: theme === 'dark' ? '#192638' : '#fff',
+      borderColor: theme === 'dark' ? '#41516a' : '#e4e7ec',
+      textStyle: { color: theme === 'dark' ? '#edf4ff' : '#1d2939' },
+    },
   };
 
   const yearOption = {
@@ -83,10 +91,12 @@ export function AnalyticsPage() {
     xAxis: {
       type: 'category' as const,
       data: years.data?.map((row) => String(row.year)),
+      axisLabel: { color: chartForeground },
     },
     yAxis: {
       type: 'value' as const,
-      splitLine: { lineStyle: { color: '#e9edf2' } },
+      axisLabel: { color: chartForeground },
+      splitLine: { lineStyle: { color: chartGrid } },
     },
     series: [
       {
@@ -109,11 +119,13 @@ export function AnalyticsPage() {
     grid: { ...chartText.grid, left: 112 },
     xAxis: {
       type: 'value' as const,
-      splitLine: { lineStyle: { color: '#e9edf2' } },
+      axisLabel: { color: chartForeground },
+      splitLine: { lineStyle: { color: chartGrid } },
     },
     yAxis: {
       type: 'category' as const,
       data: rows?.map((row) => row.name).reverse(),
+      axisLabel: { color: chartForeground },
     },
     series: [
       {
@@ -128,17 +140,17 @@ export function AnalyticsPage() {
   const trackOption = {
     ...chartText,
     grid: { ...chartText.grid, left: 150 },
-    xAxis: { type: 'value' as const },
+    xAxis: { type: 'value' as const, axisLabel: { color: chartForeground } },
     yAxis: {
       type: 'category' as const,
       data: tracks.data?.map((row) => row.name).reverse(),
-      axisLabel: { width: 130, overflow: 'truncate' as const },
+      axisLabel: { width: 130, overflow: 'truncate' as const, color: chartForeground },
     },
     series: [
       {
         type: 'bar' as const,
         data: tracks.data?.map((row) => Number(row.events)).reverse(),
-        itemStyle: { color: '#98a2b3', borderRadius: [0, 3, 3, 0] },
+        itemStyle: { color: '#4d8df7', borderRadius: [0, 3, 3, 0] },
         barMaxWidth: 20,
       },
     ],
@@ -149,20 +161,34 @@ export function AnalyticsPage() {
     xAxis: {
       type: 'category' as const,
       data: devices.data?.map((row) => row.device),
+      axisLabel: { color: chartForeground },
     },
     yAxis: [
-      { type: 'value' as const, name: 'events' },
-      { type: 'value' as const, name: 'hours' },
+      {
+        type: 'value' as const,
+        name: t('events'),
+        axisLabel: { color: chartForeground },
+        nameTextStyle: { color: chartForeground },
+      },
+      {
+        type: 'value' as const,
+        name: t('hours'),
+        axisLabel: { color: chartForeground },
+        nameTextStyle: { color: chartForeground },
+      },
     ],
     series: [
       {
-        name: 'events',
+        name: t('events'),
         type: 'bar' as const,
         data: devices.data?.map((row) => Number(row.events)),
-        itemStyle: { color: '#1d2939', borderRadius: [3, 3, 0, 0] },
+        itemStyle: {
+          color: theme === 'dark' ? '#4d8df7' : '#1d2939',
+          borderRadius: [3, 3, 0, 0],
+        },
       },
       {
-        name: 'hours',
+        name: t('hours'),
         type: 'line' as const,
         yAxisIndex: 1,
         data: devices.data?.map((row) => Number(row.hours.toFixed(1))),
@@ -178,9 +204,9 @@ export function AnalyticsPage() {
     xAxis: {
       type: 'category' as const,
       data: rows?.map((row) => row.country),
-      axisLabel: { rotate: 28 },
+      axisLabel: { rotate: 28, color: chartForeground },
     },
-    yAxis: { type: 'value' as const },
+    yAxis: { type: 'value' as const, axisLabel: { color: chartForeground } },
     series: [
       {
         type: 'bar' as const,
@@ -200,8 +226,13 @@ export function AnalyticsPage() {
     xAxis: {
       type: 'category' as const,
       data: Array.from({ length: 24 }, (_, hour) => String(hour).padStart(2, '0')),
+      axisLabel: { color: chartForeground },
     },
-    yAxis: { type: 'category' as const, data: heatmapLabels },
+    yAxis: {
+      type: 'category' as const,
+      data: heatmapLabels,
+      axisLabel: { color: chartForeground },
+    },
     visualMap: {
       min: 0,
       max: Math.max(...(heatmap.data?.map((row) => Number(row.events)) ?? [1])),
@@ -210,6 +241,7 @@ export function AnalyticsPage() {
       left: 'center',
       bottom: 0,
       inRange: { color: ['#eef4ff', '#8bb8fb', '#175cd3'] },
+      textStyle: { color: chartForeground },
     },
     series: [
       {

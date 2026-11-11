@@ -18,6 +18,52 @@ export interface RankingRow {
   hours: number;
 }
 
+export interface ArtistSummary {
+  events: number;
+  hours: number;
+  tracks: number;
+  albums: number;
+  firstPlay: string | null;
+  lastPlay: string | null;
+  averageMinutes: number;
+  globalAverageMinutes: number;
+  skipRate: number;
+  globalSkipRate: number;
+  shuffleRate: number;
+  offlineRate: number;
+}
+
+export interface ArtistTimelineRow {
+  period: string;
+  events: number;
+  hours: number;
+  totalHours: number;
+}
+
+export interface ArtistCatalogRow {
+  kind: 'track' | 'album';
+  name: string;
+  events: number;
+  hours: number;
+  rank: number;
+}
+
+export interface ArtistPatternRow {
+  kind: 'weekday' | 'hour' | 'device';
+  label: string;
+  events: number;
+  hours: number;
+  shareEvents: number;
+  globalShareEvents: number;
+  shareHours: number;
+  globalShareHours: number;
+}
+
+export interface ArtistCountryRow {
+  country: string;
+  events: number;
+}
+
 export interface DiscoverySummary {
   topTrack: string;
   topTrackEvents: number;

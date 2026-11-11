@@ -25,10 +25,33 @@ Coloca los JSON de Spotify en `data/raw/`. Para el enriquecimiento geográfico,
 coloca `GeoLite2-City.mmdb` y `GeoLite2-ASN.mmdb` en `data/Databases/`. La
 geolocalización es opcional; el ETL principal puede completarse sin esas bases.
 
-Para procesar otro conjunto, define `SPOTIFY_USER_SUFFIX`. Por ejemplo,
-`SPOTIFY_USER_SUFFIX=Pedro` utiliza `data/rawPedro/` y `data/processedPedro/`.
-Las bases GeoLite2 se leen siempre desde `data/Databases/`, independientemente
-del sufijo.
+## Procesar datos de otra persona o conjunto
+
+`SPOTIFY_USER_SUFFIX` Le indica al ETL qué carpetas usar para leer los JSON de entrada y guardar los Parquet. El sufijo se
+agrega literalmente a `raw` y `processed`.
+
+Por ejemplo, para usar el conjunto llamado `Pedro`:
+
+1. Crea la carpeta `data/rawPedro/` y coloca allí los archivos JSON exportados
+   de Spotify.
+2. En PowerShell, desde la raíz del proyecto, ejecuta:
+
+   ```powershell
+   $env:SPOTIFY_USER_SUFFIX = "Pedro"
+   python main.py
+   ```
+
+El ETL leerá de `data/rawPedro/` y escribirá en `data/processedPedro/`.
+La variable solo queda definida en esa ventana de PowerShell. Para volver al
+conjunto predeterminado (`data/raw/` y `data/processed/`), ejecuta:
+
+```powershell
+$env:SPOTIFY_USER_SUFFIX = ""
+python main.py
+```
+
+Las bases GeoLite2 se leen siempre desde `data/Databases/`, sin importar el
+sufijo.
 
 ## Salidas
 
