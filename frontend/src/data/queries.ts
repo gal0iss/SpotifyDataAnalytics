@@ -16,6 +16,7 @@ import type {
   MetricSummary,
   QualitySummary,
   RankingRow,
+  TrackRankingRow,
   YearListening,
 } from '../types';
 
@@ -116,6 +117,7 @@ export const SQL = {
   `,
   tracks: (year: string, device: string) => `
     SELECT
+      t.track_id AS "trackId",
       COALESCE(NULLIF(t.track_name, ''), 'Unknown track') AS name,
       COUNT(*) AS events,
       SUM(f.ms_played) / 3600000.0 AS hours
@@ -124,8 +126,8 @@ export const SQL = {
     JOIN read_parquet('dim_date.parquet') d ON f.date_id = d.date_id
     JOIN read_parquet('dim_device.parquet') v ON f.device_id = v.device_id
     WHERE f.track_id <> -1 AND ${where(year, device)}
-    GROUP BY name
-    ORDER BY events DESC
+    GROUP BY t.track_id, t.track_name
+    ORDER BY events DESC, t.track_id
     LIMIT 8
   `,
   heatmap: (year: string, device: string) => `
@@ -259,8 +261,8 @@ export const SQL = {
         JOIN read_parquet('dim_date.parquet') d ON f.date_id = d.date_id
         JOIN read_parquet('dim_device.parquet') v ON f.device_id = v.device_id
         WHERE f.track_id <> -1 AND ${where(year, device)}
-        GROUP BY t.track_name
-        ORDER BY COUNT(*) DESC
+        GROUP BY t.track_id, t.track_name
+        ORDER BY COUNT(*) DESC, t.track_id
         LIMIT 1
       ) AS "topTrack",
       (
@@ -270,8 +272,8 @@ export const SQL = {
         JOIN read_parquet('dim_date.parquet') d ON f.date_id = d.date_id
         JOIN read_parquet('dim_device.parquet') v ON f.device_id = v.device_id
         WHERE f.track_id <> -1 AND ${where(year, device)}
-        GROUP BY t.track_name
-        ORDER BY COUNT(*) DESC
+        GROUP BY t.track_id, t.track_name
+        ORDER BY COUNT(*) DESC, t.track_id
         LIMIT 1
       ) AS "topTrackEvents",
       (
@@ -522,26 +524,28 @@ export const SQL = {
     ranked_tracks AS (
       SELECT
         'track' AS kind,
+        track_id AS "trackId",
         name,
         events,
         hours,
-        ROW_NUMBER() OVER (ORDER BY events DESC, name) AS rank
+        ROW_NUMBER() OVER (ORDER BY events DESC, name, track_id) AS rank
       FROM tracks
     ),
     ranked_albums AS (
       SELECT
         'album' AS kind,
+        NULL AS "trackId",
         name,
         events,
         hours,
         ROW_NUMBER() OVER (ORDER BY events DESC, name) AS rank
       FROM albums
     )
-    SELECT kind, name, events, hours, rank
+    SELECT kind, "trackId", name, events, hours, rank
     FROM ranked_tracks
     WHERE rank <= 10
     UNION ALL
-    SELECT kind, name, events, hours, rank
+    SELECT kind, "trackId", name, events, hours, rank
     FROM ranked_albums
     WHERE rank <= 10
   `,
@@ -640,7 +644,7 @@ export async function queryArtistsByTime(year: string, device: string) {
 }
 
 export async function queryTracks(year: string, device: string) {
-  return query<RankingRow>(SQL.tracks(year, device));
+  return query<TrackRankingRow>(SQL.tracks(year, device));
 }
 
 export async function queryHeatmap(year: string, device: string) {

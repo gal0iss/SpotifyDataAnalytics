@@ -101,6 +101,8 @@ const factFields: SchemaField[] = [
   { name: 'ms_played', type: 'MEASURE' },
   { name: 'offline', type: 'ATTRIBUTE' },
   { name: 'shuffle', type: 'ATTRIBUTE' },
+  { name: 'skipped', type: 'ATTRIBUTE' },
+  { name: 'track_id', type: 'FK' },
 ];
 
 const dimensions: SchemaDimension[] = [
@@ -124,9 +126,9 @@ const dimensions: SchemaDimension[] = [
     kind: 'DIMENSION',
     fields: [
       { name: 'track_id', type: 'PK' },
-      { name: 'Album_name', type: 'ATTRIBUTE' },
-      { name: 'Artist_name', type: 'ATTRIBUTE' },
-      { name: 'Spotify_track_uri', type: 'ATTRIBUTE' },
+      { name: 'album_name', type: 'ATTRIBUTE' },
+      { name: 'artist_name', type: 'ATTRIBUTE' },
+      { name: 'spotify_track_uri', type: 'ATTRIBUTE' },
       { name: 'track_name', type: 'ATTRIBUTE' },
     ],
     relation: schemaRelations.track,
@@ -138,7 +140,7 @@ const dimensions: SchemaDimension[] = [
     fields: [
       { name: 'device_id', type: 'PK' },
       { name: 'device_type', type: 'ATTRIBUTE' },
-      { name: 'plataform', type: 'ATTRIBUTE' },
+      { name: 'platform', type: 'ATTRIBUTE' },
     ],
     relation: schemaRelations.device,
   },
@@ -207,15 +209,15 @@ export function StarSchemaDiagram() {
       <div className="star-schema-board" onMouseLeave={() => setHovered(null)}>
         <svg
           className="schema-connections"
-          viewBox="0 0 1000 1180"
+          viewBox="0 0 1000 1340"
           preserveAspectRatio="none"
           aria-hidden="true"
         >
           <line className={hovered === 'date' ? 'is-active' : ''} x1="500" y1="340" x2="500" y2="302" />
           <line className={hovered === 'track' ? 'is-active' : ''} x1="365" y1="430" x2="170" y2="430" />
           <line className={hovered === 'device' ? 'is-active' : ''} x1="635" y1="430" x2="830" y2="430" />
-          <line className={hovered === 'episode' ? 'is-active' : ''} x1="500" y1="658" x2="350" y2="620" />
-          <line className={hovered === 'location' ? 'is-active' : ''} x1="500" y1="658" x2="680" y2="620" />
+          <line className={hovered === 'episode' ? 'is-active' : ''} x1="500" y1="708" x2="350" y2="740" />
+          <line className={hovered === 'location' ? 'is-active' : ''} x1="500" y1="708" x2="680" y2="740" />
         </svg>
 
         <div className="schema-node schema-node-date">

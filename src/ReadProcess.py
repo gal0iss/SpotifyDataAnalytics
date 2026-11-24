@@ -2,7 +2,6 @@
 
 from pathlib import Path
 import pandas as pd
-import numpy as np
 from .logger import logger
 from config import RAW_DATA_DIR, PROCESSED_DATA_DIR, AUDIOBOOK_COLUMNS_PATTERN
 from config import DIM_DATE_FILE, DIM_DEVICE_FILE, DIM_TRACK_FILE, DIM_EPISODE_FILE
@@ -126,7 +125,8 @@ def create_dim_device(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         DataFrame dim_device con PK=device_id
     """
-    temp = df.copy()
+    # Nulos y valor reservado comparten el único miembro desconocido.
+    temp = df.loc[df["platform"].notna() & df["platform"].ne(UNKNOWN_VALUE)].copy()
     temp["device_type"] = temp["platform"].apply(classify_device)
     
     # Unicidad por platform (Natural Key)
@@ -210,7 +210,8 @@ def create_dim_location(df: pd.DataFrame) -> pd.DataFrame:
         DataFrame dim_location con PK=location_id
     """
     # Unicidad por ip_addr (Natural Key)
-    dim_location = df[["ip_addr", "conn_country"]].drop_duplicates(subset=["ip_addr"]).reset_index(drop=True)
+    known = df.loc[df["ip_addr"].notna() & df["ip_addr"].ne("0.0.0.0")]
+    dim_location = known[["ip_addr", "conn_country"]].drop_duplicates(subset=["ip_addr"]).reset_index(drop=True)
     dim_location["location_id"] = dim_location.index
     
     unknown = pd.DataFrame([{"ip_addr": "0.0.0.0", "conn_country": "XX", "location_id": UNKNOWN_ID}])
@@ -264,6 +265,7 @@ def main() -> None:
     # 1. EXTRACT & CLEAN
     df = extract_json_files(RAW_DATA_DIR)
     df = clean_data(df)
+    original_count = len(df)
 
     # 2. CREATE DIMENSIONS
     dim_date = create_dim_date(df)
@@ -277,22 +279,27 @@ def main() -> None:
     df["spotify_episode_uri"] = df["spotify_episode_uri"].astype(pd.StringDtype())
     dim_track["spotify_track_uri"] = dim_track["spotify_track_uri"].astype(pd.StringDtype())
     dim_episode["spotify_episode_uri"] = dim_episode["spotify_episode_uri"].astype(pd.StringDtype())
+    for key, dimension in [("platform", dim_device), ("ip_addr", dim_location)]:
+        df[key] = df[key].astype(pd.StringDtype())
+        dimension[key] = dimension[key].astype(pd.StringDtype())
 
     # 3. MERGES (Solo contra las Natural Keys únicas para evitar duplicar filas)
     # Importante: No incluimos columnas de atributos en el merge, solo la natural key y el id.
     
-    df = df.merge(dim_device[["platform", "device_id"]], on="platform", how="left")
-    df = df.merge(dim_track[["spotify_track_uri", "track_id"]], on="spotify_track_uri", how="left")
-    df = df.merge(dim_episode[["spotify_episode_uri", "episode_id"]], on="spotify_episode_uri", how="left")
-    df = df.merge(dim_location[["ip_addr", "location_id"]], on="ip_addr", how="left")
+    df = df.merge(dim_device[["platform", "device_id"]], on="platform", how="left", validate="many_to_one")
+    df = df.merge(dim_track[["spotify_track_uri", "track_id"]], on="spotify_track_uri", how="left", validate="many_to_one")
+    df = df.merge(dim_episode[["spotify_episode_uri", "episode_id"]], on="spotify_episode_uri", how="left", validate="many_to_one")
+    df = df.merge(dim_location[["ip_addr", "location_id"]], on="ip_addr", how="left", validate="many_to_one")
 
     # 4. FACT TABLE
     fact_table = create_fact_table(df)
 
     # 5. FINAL VALIDATION
     logger.info("--- VALIDACIÓN FINAL ---")
-    logger.info(f"Filas originales: {len(df)}")
+    logger.info(f"Filas originales: {original_count}")
     logger.info(f"Filas Fact Table: {len(fact_table)}")
+    if len(fact_table) != original_count or not fact_table["event_id"].is_unique:
+        raise ValueError("El ETL debe conservar exactamente una fila por evento de entrada")
     
     keys_to_check = ["track_id", "episode_id", "device_id", "location_id"]
     nulls = fact_table[keys_to_check].isnull().sum()

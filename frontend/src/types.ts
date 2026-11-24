@@ -18,6 +18,10 @@ export interface RankingRow {
   hours: number;
 }
 
+export interface TrackRankingRow extends RankingRow {
+  trackId: number;
+}
+
 export interface ArtistSummary {
   events: number;
   hours: number;
@@ -42,6 +46,7 @@ export interface ArtistTimelineRow {
 
 export interface ArtistCatalogRow {
   kind: 'track' | 'album';
+  trackId: number | null;
   name: string;
   events: number;
   hours: number;
@@ -53,10 +58,10 @@ export interface ArtistPatternRow {
   label: string;
   events: number;
   hours: number;
-  shareEvents: number;
-  globalShareEvents: number;
-  shareHours: number;
-  globalShareHours: number;
+  shareEvents: number | null;
+  globalShareEvents: number | null;
+  shareHours: number | null;
+  globalShareHours: number | null;
 }
 
 export interface ArtistCountryRow {

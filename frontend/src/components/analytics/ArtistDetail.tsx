@@ -56,7 +56,7 @@ export function ArtistDetail({ artist, year, device, onClose }: ArtistDetailProp
   const artistListeningHours = monthlyRows.reduce((total, row) => total + row.hours, 0);
   const overallShare = totalListeningHours
     ? (artistListeningHours / totalListeningHours) * 100
-    : 0;
+    : null;
 
   const tooltip = {
     trigger: 'axis' as const,
@@ -147,13 +147,17 @@ export function ArtistDetail({ artist, year, device, onClose }: ArtistDetailProp
       {
         name: t('artist'),
         type: 'bar' as const,
-        data: rows.map((row) => Number(row[value].toFixed(2))).reverse(),
+        data: rows
+          .map((row) => row[value] === null ? null : Number(row[value].toFixed(2)))
+          .reverse(),
         itemStyle: { color: '#4d8df7', borderRadius: [0, 3, 3, 0] },
       },
       {
         name: t('overallListening'),
         type: 'bar' as const,
-        data: rows.map((row) => Number(row[globalValue].toFixed(2))).reverse(),
+        data: rows
+          .map((row) => row[globalValue] === null ? null : Number(row[globalValue].toFixed(2)))
+          .reverse(),
         itemStyle: { color: '#98a2b3', borderRadius: [0, 3, 3, 0] },
       },
     ],
@@ -266,8 +270,8 @@ export function ArtistDetail({ artist, year, device, onClose }: ArtistDetailProp
             <div className="artist-comparison-grid">
               <Comparison
                 label={t('artistShare')}
-                artist={`${overallShare.toFixed(1)}%`}
-                global="100%"
+                artist={overallShare === null ? '—' : `${overallShare.toFixed(1)}%`}
+                global={overallShare === null ? '—' : '100%'}
                 globalLabel={t('overallListening')}
               />
               <Comparison
@@ -387,14 +391,18 @@ export function ArtistDetail({ artist, year, device, onClose }: ArtistDetailProp
                   />
                 </DetailChart>
                 <DetailChart title={t('timeByDevice')}>
-                  <Chart
-                    option={patternOption(
-                      deviceRows,
-                      'shareHours',
-                      'globalShareHours',
-                    )}
-                    height={270}
-                  />
+                  {deviceRows.some((row) => row.shareHours !== null) ? (
+                    <Chart
+                      option={patternOption(
+                        deviceRows,
+                        'shareHours',
+                        'globalShareHours',
+                      )}
+                      height={270}
+                    />
+                  ) : (
+                    <StatePanel loading={false} error={null} empty />
+                  )}
                 </DetailChart>
               </div>
             ) : null}
@@ -520,7 +528,7 @@ function CatalogTable({ title, kind, rows, totalEvents, t }: CatalogTableProps) 
           </thead>
           <tbody>
             {matchingRows.map((row, index) => (
-              <tr key={`${kind}-${row.name}`}>
+              <tr key={kind === 'track' ? row.trackId : row.name}>
                 <td>{index + 1}</td>
                 <td>{row.name}</td>
                 <td>{Number(row.events).toLocaleString()}</td>

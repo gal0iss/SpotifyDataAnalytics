@@ -17,23 +17,12 @@ pip-delete-this-directory.txt
 logs/
 *.log
 
-# Data (local, no versionable)
-data/raw/
-data/rawPedro/
-data/processed/
-data/processedPedro/
+# Datos y bases locales (incluye todos los sufijos de usuario)
+/data/
 
-*.parquet
-*.json
-
-# Frontend beta: contrato público de datos y configuración de build
-!frontend/package.json
-!frontend/package-lock.json
-!frontend/tsconfig.json
-!frontend/tsconfig.app.json
-!frontend/public/
-!frontend/public/parquet/
-!frontend/public/parquet/*.parquet
+# Dependencias y cachés del frontend; public/parquet sí se versiona
+node_modules/
+*.tsbuildinfo
 
 # IDE
 .vscode/
@@ -44,10 +33,6 @@ data/processedPedro/
 # OS
 .DS_Store
 Thumbs.db
-
-# Databases (archivos locales)
-data/Databases/
-data/Databases/**
 
 # Caches from testing and type checking
 .pytest_cache/
@@ -67,8 +52,6 @@ dist/
 *.egg
 *.whl
 
-data/*.db
-
 # Coverage reports
 htmlcov/
 .coverage
@@ -86,7 +69,3 @@ coverage.xml
 
 # Pyenv
 .python-version
-
-#md
-TECHNICAL_DOCUMENTATION.md
-DOC.MD

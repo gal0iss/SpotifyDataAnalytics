@@ -123,6 +123,60 @@ class TestETLPipeline:
         fact_table = pd.read_parquet(temp_data_dir["processed"] / "fact_table.parquet")
         assert len(fact_table) == initial_count
 
+    @pytest.mark.parametrize("all_missing", [False, True])
+    def test_reserved_and_missing_keys_preserve_events(
+        self, mocker, temp_data_dir, sample_streaming_data, all_missing
+    ):
+        data = sample_streaming_data.copy()
+        data["platform"] = ["Unknown", "Windows", None]
+        data["ip_addr"] = ["0.0.0.0", "203.0.113.2", None]
+        if all_missing:
+            data[["platform", "ip_addr"]] = None
+        (temp_data_dir["raw"] / "reserved.json").write_text(
+            data.to_json(orient="records", date_format="iso"), encoding="utf-8"
+        )
+        _patch_etl_paths(mocker, temp_data_dir)
+        mocker.patch("src.ReadProcess.logger")
+
+        etl_main()
+
+        proc = temp_data_dir["processed"]
+        fact = pd.read_parquet(proc / "fact_table.parquet")
+        assert len(fact) == len(data)
+        assert fact["event_id"].is_unique
+        assert fact["ms_played"].sum() == data["ms_played"].sum()
+        for table, natural_key, foreign_key in (
+            ("dim_device", "platform", "device_id"),
+            ("dim_location", "ip_addr", "location_id"),
+        ):
+            dimension = pd.read_parquet(proc / f"{table}.parquet")
+            assert dimension[natural_key].is_unique
+            assert (dimension[foreign_key] == -1).sum() == 1
+            assert fact[foreign_key].isin(dimension[foreign_key]).all()
+            assert (fact.loc[fact["event_id"].isin([0, 2]), foreign_key] == -1).all()
+            if all_missing:
+                assert (fact[foreign_key] == -1).all()
+
+    def test_duplicate_dimension_key_fails_before_writing(
+        self, mocker, temp_data_dir, sample_streaming_data
+    ):
+        from src.ReadProcess import create_dim_device
+
+        (temp_data_dir["raw"] / "streaming.json").write_text(
+            sample_streaming_data.to_json(orient="records", date_format="iso"),
+            encoding="utf-8",
+        )
+        dimension = create_dim_device(sample_streaming_data)
+        duplicate = pd.concat([dimension, dimension.iloc[[1]]], ignore_index=True)
+        _patch_etl_paths(mocker, temp_data_dir)
+        mocker.patch("src.ReadProcess.create_dim_device", return_value=duplicate)
+        mocker.patch("src.ReadProcess.logger")
+
+        with pytest.raises(pd.errors.MergeError):
+            etl_main()
+
+        assert not list(temp_data_dir["processed"].glob("*.parquet"))
+
 
 class TestValidateData:
     """Tests para la validación de datos."""
