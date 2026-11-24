@@ -2,7 +2,6 @@
 
 Convierte un historial de Spotify en un modelo analítico y permite explorar hábitos de escucha en el navegador. El flujo es **Spotify JSON → ETL Python → Parquet → SQL en DuckDB WASM → React + ECharts**. No requiere un servidor de consultas.
 
-Este README es la documentación vigente. El PDF enlazado desde la interfaz se conserva como documentación anterior.
 
 ## Arrancar la demo
 
